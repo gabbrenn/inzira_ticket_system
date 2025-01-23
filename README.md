@@ -1,6 +1,6 @@
 # Inzira Ticket System
 
-Welcome to the Online Bus Ticket System! This project is a web application built using Springboot, designed to simplify the process of booking bus tickets online. It features multiple user roles, including Master Admin, Bus Operators, Drivers, and Customer, allowing for comprehensive management of bus routes, schedules, and ticket sales.
+Welcome to the Inzira Ticket System! This project is a web application built using Springboot, designed to simplify the process of booking bus tickets online. It features multiple user roles, including Master Admin, Bus Operators, Drivers, and Customer, allowing for comprehensive management of bus routes, schedules, and ticket sales.
 
 ## Table of Contents
 
