@@ -44,5 +44,7 @@ public class Agency {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    private String logoPath;
+
     public Agency(){}
 }

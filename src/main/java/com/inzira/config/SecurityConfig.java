@@ -21,15 +21,28 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // @Bean
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
+    //         .csrf(csrf -> csrf.disable()) // Disable CSRF
+    //         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Allow all requests
+
+    //     return http.build();
+    // }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
             .csrf(csrf -> csrf.disable()) // Disable CSRF
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Allow all requests
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // Allow all requests
+            .formLogin(form -> form.disable()) // ⛔ Disable default form login
+            .httpBasic(basic -> basic.disable()); // ⛔ Disable basic auth
 
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
