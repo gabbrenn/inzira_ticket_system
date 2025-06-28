@@ -1,11 +1,11 @@
 package com.inzira.agency.services;
 
-import com.inzira.agency.models.Agency;
-import com.inzira.agency.models.AgencyRoute;
+import com.inzira.agency.entities.Agency;
+import com.inzira.agency.entities.AgencyRoute;
 import com.inzira.agency.repositories.AgencyRepository;
 import com.inzira.agency.repositories.AgencyRouteRepository;
-import com.inzira.shared.models.Route;
-import com.inzira.shared.models.RoutePoint;
+import com.inzira.shared.entities.Route;
+import com.inzira.shared.entities.RoutePoint;
 import com.inzira.shared.repositories.RoutePointRepository;
 import com.inzira.shared.repositories.RouteRepository;
 

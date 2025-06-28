@@ -1,8 +1,8 @@
 package com.inzira.agency.controllers;
 
 import com.inzira.agency.dtos.AgencyRouteDTO;
+import com.inzira.agency.entities.AgencyRoute;
 import com.inzira.agency.mappers.AgencyRouteMapper;
-import com.inzira.agency.models.AgencyRoute;
 import com.inzira.agency.services.AgencyRouteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/agency-routes")
+@RequestMapping("/api/agency/routes")
 public class AgencyRouteController {
 
     @Autowired

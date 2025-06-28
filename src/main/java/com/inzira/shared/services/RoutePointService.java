@@ -3,7 +3,7 @@ package com.inzira.shared.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.inzira.shared.models.RoutePoint;
+import com.inzira.shared.entities.RoutePoint;
 import com.inzira.shared.repositories.RoutePointRepository;
 
 import jakarta.persistence.EntityNotFoundException;

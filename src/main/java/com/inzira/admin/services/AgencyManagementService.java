@@ -14,10 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.inzira.admin.dtos.AgencyDTO;
 import com.inzira.admin.dtos.AgencyUpdateDTO;
 import com.inzira.admin.mappers.AgencyMapper;
-import com.inzira.agency.models.Agency;
+import com.inzira.agency.entities.Agency;
 import com.inzira.agency.repositories.AgencyRepository;
-import com.inzira.agency.utils.PasswordUtility;
+import com.inzira.shared.exceptions.ResourceNotFoundException;
 import com.inzira.shared.services.FileStorageService;
+import com.inzira.shared.utils.PasswordUtility;
 
 @Service
 public class AgencyManagementService {
@@ -45,48 +46,31 @@ public class AgencyManagementService {
     // Get agency by ID as DTO with error handling
     public AgencyDTO getAgencyById(Long id) {
         Agency agency = agencyRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Agency not found!"));
+            .orElseThrow(() -> new ResourceNotFoundException("Agency with ID " + id + " not found"));
         return agencyMapper.toDTO(agency);
     }
 
     // Update agency by ID using DTO + optional MultipartFile
     public AgencyDTO updateAgency(Long id, AgencyUpdateDTO dto, MultipartFile logoFile) {
-        return agencyRepository.findById(id)
-            .map(existingAgency -> {
-                // Use mapper to update entity from DTO
-                agencyMapper.updateEntityFromDTO(dto, existingAgency);
+        Agency agency = agencyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Agency with ID " + id + " not found"));
 
-                // Handle new logo file upload
-                if (logoFile != null && !logoFile.isEmpty()) {
-                    try {
-                        // Delete old logo file
-                        String oldLogoPath = existingAgency.getLogoPath();
-                        if (oldLogoPath != null && !oldLogoPath.isBlank()) {
-                            Path uploadDir = Paths.get("uploads");
-                            Path fullPath = uploadDir.resolve(oldLogoPath);
-                            File oldFile = fullPath.toFile();
-                            if (oldFile.exists()) oldFile.delete();
-                        }
+        // Update agency fields from DTO
+        agencyMapper.updateEntityFromDTO(dto, agency);
 
-                        // Store new logo file
-                        String newFilePath = fileStorageService.storeFile(logoFile, "user-profile");
-                        existingAgency.setLogoPath(newFilePath);
+        // Handle optional logo
+        if (logoFile != null && !logoFile.isEmpty()) {
+            handleLogoUpdate(agency, logoFile);
+        }
 
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to store logo file during update: " + e.getMessage(), e);
-                    }
-                }
-
-                Agency savedAgency = agencyRepository.save(existingAgency);
-                return agencyMapper.toDTO(savedAgency);
-            })
-            .orElseThrow(() -> new IllegalArgumentException("Agency not found."));
+        Agency saved = agencyRepository.save(agency);
+        return agencyMapper.toDTO(saved);
     }
 
     // Reset agency password and return new raw password (handle email sending outside)
     public String resetPassword(Long agencyId) {
         Agency agency = agencyRepository.findById(agencyId)
-                .orElseThrow(() -> new RuntimeException("Agency not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
 
         String newPassword = passwordUtility.generateInitialPassword(agency.getAgencyName(), agency.getPhoneNumber());
         agency.setPassword(passwordUtility.encodePassword(newPassword));
@@ -98,19 +82,32 @@ public class AgencyManagementService {
     // Delete agency and delete logo file
     public void deleteAgency(Long id) {
         Agency agency = agencyRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Agency not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
 
-        String logoPath = agency.getLogoPath();
-        if (logoPath != null && !logoPath.isBlank()) {
-            Path uploadDir = Paths.get("uploads");
-            Path fullPath = uploadDir.resolve(logoPath);
-            File logoFile = fullPath.toFile();
-
-            if (logoFile.exists() && !logoFile.delete()) {
-                System.err.println("⚠️ Failed to delete logo file: " + logoFile.getAbsolutePath());
-            }
-        }
+        deleteLogoIfExists(agency.getLogoPath());
 
         agencyRepository.deleteById(id);
+    }
+
+
+
+     // 🔧 Utility: Handle logo replacement
+    private void handleLogoUpdate(Agency agency, MultipartFile logoFile) {
+        try {
+            deleteLogoIfExists(agency.getLogoPath());
+            String newLogoPath = fileStorageService.storeFile(logoFile, "user-profile");
+            agency.setLogoPath(newLogoPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store logo during update", e);
+        }
+    }
+
+    // 🔧 Utility: Delete logo file if it exists
+    private void deleteLogoIfExists(String logoPath) {
+        if (logoPath != null && !logoPath.isBlank()) {
+            Path fullPath = Paths.get("uploads").resolve(logoPath);
+            File file = fullPath.toFile();
+            if (file.exists()) file.delete();
+        }
     }
 }

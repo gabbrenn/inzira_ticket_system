@@ -1,4 +1,4 @@
-package com.inzira.admin.models;
+package com.inzira.admin.entities;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;

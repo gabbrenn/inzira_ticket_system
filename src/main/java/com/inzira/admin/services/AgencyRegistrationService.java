@@ -7,13 +7,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.inzira.agency.models.Agency;
+import com.inzira.agency.entities.Agency;
 import com.inzira.agency.repositories.AgencyRepository;
 import com.inzira.admin.dtos.AgencyRegistrationDTO;
 import com.inzira.admin.dtos.AgencyDTO;
 import com.inzira.admin.mappers.AgencyMapper;
-import com.inzira.agency.utils.PasswordUtility;
 import com.inzira.shared.services.FileStorageService;
+import com.inzira.shared.utils.PasswordUtility;
 
 @Service
 public class AgencyRegistrationService {

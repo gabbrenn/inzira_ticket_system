@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.inzira.agency.models.AgencyRoute;
+import com.inzira.agency.entities.AgencyRoute;
 
 public interface AgencyRouteRepository extends JpaRepository<AgencyRoute, Long> {
     List<AgencyRoute> findByRouteId(Long routeId);

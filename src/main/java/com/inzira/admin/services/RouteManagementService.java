@@ -1,7 +1,7 @@
-package com.inzira.shared.services;
+package com.inzira.admin.services;
 
-import com.inzira.shared.models.District;
-import com.inzira.shared.models.Route;
+import com.inzira.shared.entities.District;
+import com.inzira.shared.entities.Route;
 import com.inzira.shared.repositories.DistrictRepository;
 import com.inzira.shared.repositories.RouteRepository;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class RouteService {
+public class RouteManagementService {
 
     @Autowired
     private RouteRepository routeRepository;

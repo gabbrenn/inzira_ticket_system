@@ -1,7 +1,7 @@
-package com.inzira.shared.controllers;
+package com.inzira.admin.controllers;
 
-import com.inzira.shared.models.Route;
-import com.inzira.shared.services.RouteService;
+import com.inzira.admin.services.RouteManagementService;
+import com.inzira.shared.entities.Route;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/routes")
-public class RouteController {
+@RequestMapping("/api/admin/routes")
+public class RouteManagementController {
 
     @Autowired
-    private RouteService routeService;
+    private RouteManagementService routeService;
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Route route) {

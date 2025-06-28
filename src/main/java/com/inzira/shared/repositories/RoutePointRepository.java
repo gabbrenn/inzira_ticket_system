@@ -3,7 +3,7 @@ package com.inzira.shared.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.inzira.shared.models.RoutePoint;
+import com.inzira.shared.entities.RoutePoint;
 
 import java.util.List;
 

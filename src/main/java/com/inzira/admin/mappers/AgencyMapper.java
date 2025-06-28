@@ -1,7 +1,7 @@
 package com.inzira.admin.mappers;
 
-import com.inzira.agency.models.Agency;
 import com.inzira.admin.dtos.*;
+import com.inzira.agency.entities.Agency;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

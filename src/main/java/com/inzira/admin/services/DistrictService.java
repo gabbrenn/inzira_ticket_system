@@ -1,9 +1,9 @@
-package com.inzira.shared.services;
+package com.inzira.admin.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.inzira.shared.models.District;
+import com.inzira.shared.entities.District;
 import com.inzira.shared.repositories.DistrictRepository;
 
 import jakarta.persistence.EntityNotFoundException;

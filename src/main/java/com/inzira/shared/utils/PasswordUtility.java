@@ -1,4 +1,4 @@
-package com.inzira.agency.utils;
+package com.inzira.shared.utils;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.inzira.agency.models;
+package com.inzira.agency.entities;
 
 import java.time.LocalDateTime;
 

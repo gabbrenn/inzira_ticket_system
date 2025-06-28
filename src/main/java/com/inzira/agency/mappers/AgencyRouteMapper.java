@@ -2,7 +2,7 @@ package com.inzira.agency.mappers;
 
 import com.inzira.agency.dtos.AgencyDTO;
 import com.inzira.agency.dtos.AgencyRouteDTO;
-import com.inzira.agency.models.AgencyRoute;
+import com.inzira.agency.entities.AgencyRoute;
 import com.inzira.shared.dtos.DistrictDTO;
 import com.inzira.shared.dtos.RouteDTO;
 import com.inzira.shared.dtos.RoutePointDTO;

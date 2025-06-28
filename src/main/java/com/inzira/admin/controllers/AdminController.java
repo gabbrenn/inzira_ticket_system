@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.inzira.admin.models.Admin;
+import com.inzira.admin.entities.Admin;
 import com.inzira.admin.services.AdminService;
 
 import org.springframework.web.bind.annotation.PostMapping;

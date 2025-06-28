@@ -1,13 +1,13 @@
-package com.inzira.shared.controllers;
+package com.inzira.admin.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.inzira.shared.models.District;
-import com.inzira.shared.models.RoutePoint;
-import com.inzira.shared.services.DistrictService;
+import com.inzira.admin.services.DistrictService;
+import com.inzira.shared.entities.District;
+import com.inzira.shared.entities.RoutePoint;
 import com.inzira.shared.services.RoutePointService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/districts")
-public class DistrictController {
+@RequestMapping("/api/admin/districts")
+public class DistrictManagementController {
 
     @Autowired
     private DistrictService districtService;

@@ -1,4 +1,4 @@
-package com.inzira.shared.models;
+package com.inzira.shared.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 

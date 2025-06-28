@@ -1,12 +1,12 @@
-package com.inzira.agency.models;
+package com.inzira.agency.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
 
-import com.inzira.shared.models.Route;
-import com.inzira.shared.models.RoutePoint;
+import com.inzira.shared.entities.Route;
+import com.inzira.shared.entities.RoutePoint;
 
 @Entity
 @Data
