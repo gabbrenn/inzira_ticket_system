@@ -8,13 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import com.inzira.admin.services.DistrictService;
 import com.inzira.shared.entities.District;
 import com.inzira.shared.entities.RoutePoint;
+import com.inzira.shared.exceptions.ApiResponse;
 import com.inzira.shared.services.RoutePointService;
 
-import jakarta.persistence.EntityNotFoundException;
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/districts")
@@ -24,195 +21,104 @@ public class DistrictManagementController {
     private DistrictService districtService;
 
     @Autowired
-    private RoutePointService locationService;
+    private RoutePointService routePointService;
 
     // Create District
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody District district) {
-        try {
-            return ResponseEntity.ok(districtService.createDistrict(district));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<District>> createDistrict(@RequestBody District district) {
+        District createdDistrict = districtService.createDistrict(district);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new ApiResponse<>(true, "District created successfully", createdDistrict));
     }
 
     // Get All Districts
     @GetMapping
-    public ResponseEntity<?> getAllDistricts() {
+    public ResponseEntity<ApiResponse<List<District>>> getAllDistricts() {
         List<District> districts = districtService.getAll();
-        if (districts.isEmpty()) {
-            return ResponseEntity.ok(Map.of(
-                "message", "No District found",
-                "status", HttpStatus.OK.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        }
-        return ResponseEntity.ok(districts);
+        String message = districts.isEmpty() ? "No districts found" : "Districts retrieved successfully";
+        return ResponseEntity.ok(new ApiResponse<>(true, message, districts));
     }
 
     // Get District by ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
-        try {
-            District district = districtService.getById(id);
-            return ResponseEntity.ok(district);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        }
+    public ResponseEntity<ApiResponse<District>> getDistrictById(@PathVariable Long id) {
+        District district = districtService.getById(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "District found", district));
     }
 
     // Update District
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDistrict(@PathVariable Long id, @RequestBody District district) {
-        try {
-            District updated = districtService.updateDistrict(id, district);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.BAD_REQUEST.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        }
+    public ResponseEntity<ApiResponse<District>> updateDistrict(
+            @PathVariable Long id, 
+            @RequestBody District district) {
+        District updatedDistrict = districtService.updateDistrict(id, district);
+        return ResponseEntity.ok(new ApiResponse<>(true, "District updated successfully", updatedDistrict));
     }
 
     // Delete District
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDistrict(@PathVariable Long id) {
-        try {
-            districtService.deleteDistrict(id);
-            return ResponseEntity.ok(Map.of(
-                "message", "District deleted successfully",
-                "status", HttpStatus.OK.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        }
+    public ResponseEntity<ApiResponse<Void>> deleteDistrict(@PathVariable Long id) {
+        districtService.deleteDistrict(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "District deleted successfully"));
     }
 
     // Add RoutePoint to District
     @PostMapping("/{districtId}/points")
-    public ResponseEntity<?> addLocation(@PathVariable Long districtId, @RequestBody RoutePoint location) {
-        try {
-            District district = districtService.getById(districtId);
-            location.setDistrict(district);
-            RoutePoint created = locationService.createLocation(location);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", "District not found",
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.BAD_REQUEST.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        }
+    public ResponseEntity<ApiResponse<RoutePoint>> addRoutePointToDistrict(
+            @PathVariable Long districtId, 
+            @RequestBody RoutePoint routePoint) {
+        District district = districtService.getById(districtId);
+        routePoint.setDistrict(district);
+        RoutePoint createdRoutePoint = routePointService.createLocation(routePoint);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new ApiResponse<>(true, "Route point added successfully", createdRoutePoint));
     }
 
-    // Update RoutePoints inside District
+    // Update RoutePoint in District
     @PutMapping("/{districtId}/points/{pointId}")
-    public ResponseEntity<?> updateLocation(
-        @PathVariable Long districtId,
-        @PathVariable Long locationId,
-        @RequestBody RoutePoint updatedLocation
-    ) {
-        try {
-            District district = districtService.getById(districtId);
-            RoutePoint location = locationService.getById(locationId);
-
-            if (!location.getDistrict().getId().equals(district.getId())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "message", "Point does not belong to the specified district",
-                    "status", HttpStatus.BAD_REQUEST.value(),
-                    "timestamp", LocalDateTime.now()
-                ));
-            }
-
-            updatedLocation.setDistrict(district);
-            RoutePoint updated = locationService.updateLocation(locationId, updatedLocation);
-            return ResponseEntity.ok(updated);
-
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.BAD_REQUEST.value(),
-                "timestamp", LocalDateTime.now()
-            ));
+    public ResponseEntity<ApiResponse<RoutePoint>> updateRoutePointInDistrict(
+            @PathVariable Long districtId,
+            @PathVariable Long pointId,
+            @RequestBody RoutePoint updatedRoutePoint) {
+        
+        // Validate district exists
+        District district = districtService.getById(districtId);
+        
+        // Validate route point exists and belongs to district
+        RoutePoint existingRoutePoint = routePointService.getById(pointId);
+        if (!existingRoutePoint.getDistrict().getId().equals(districtId)) {
+            throw new IllegalArgumentException("Route point does not belong to the specified district");
         }
+
+        updatedRoutePoint.setDistrict(district);
+        RoutePoint updated = routePointService.updateLocation(pointId, updatedRoutePoint);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Route point updated successfully", updated));
     }
 
-    // Delete Location inside District
+    // Delete RoutePoint from District
     @DeleteMapping("/{districtId}/points/{pointId}")
-    public ResponseEntity<?> deleteLocation(@PathVariable Long districtId, @PathVariable Long locationId) {
-        try {
-            RoutePoint location = locationService.getById(locationId);
-            if (!location.getDistrict().getId().equals(districtId)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "message", "Point does not belong to the specified district",
-                    "status", HttpStatus.BAD_REQUEST.value(),
-                    "timestamp", LocalDateTime.now()
-                ));
-            }
-            locationService.deleteLocation(locationId);
-            return ResponseEntity.ok(Map.of(
-                "message", "RoutPoint deleted successfully",
-                "status", HttpStatus.OK.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", e.getMessage(),
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
+    public ResponseEntity<ApiResponse<Void>> deleteRoutePointFromDistrict(
+            @PathVariable Long districtId, 
+            @PathVariable Long pointId) {
+        
+        // Validate route point exists and belongs to district
+        RoutePoint routePoint = routePointService.getById(pointId);
+        if (!routePoint.getDistrict().getId().equals(districtId)) {
+            throw new IllegalArgumentException("Route point does not belong to the specified district");
         }
+        
+        routePointService.deleteLocation(pointId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Route point deleted successfully"));
     }
 
-    // List Locations by District
+    // Get RoutePoints by District
     @GetMapping("/{districtId}/points")
-    public ResponseEntity<?> getByDistrict(@PathVariable Long districtId) {
-        try {
-            districtService.getById(districtId); // validate existence
-            List<RoutePoint> locations = locationService.getByDistrict(districtId);
-            if (locations.isEmpty()) {
-                return ResponseEntity.ok(Map.of(
-                    "message", "No RoutePoint found in this district",
-                    "status", HttpStatus.OK.value(),
-                    "timestamp", LocalDateTime.now()
-                ));
-            }
-            return ResponseEntity.ok(locations);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "message", "District not found",
-                "status", HttpStatus.NOT_FOUND.value(),
-                "timestamp", LocalDateTime.now()
-            ));
-        }
+    public ResponseEntity<ApiResponse<List<RoutePoint>>> getRoutePointsByDistrict(@PathVariable Long districtId) {
+        // Validate district exists
+        districtService.getById(districtId);
+        
+        List<RoutePoint> routePoints = routePointService.getByDistrict(districtId);
+        String message = routePoints.isEmpty() ? "No route points found in this district" : "Route points retrieved successfully";
+        return ResponseEntity.ok(new ApiResponse<>(true, message, routePoints));
     }
 }

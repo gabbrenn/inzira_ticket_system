@@ -2,6 +2,7 @@ package com.inzira.shared.exceptions;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
@@ -16,14 +17,28 @@ public class GlobalExceptionHandler {
 
     // Handle custom not-found exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-        ErrorDetails error = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getRequestURI());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    // Handle validation errors
+    // Handle JPA EntityNotFoundException
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEntityNotFound(EntityNotFoundException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // Handle IllegalArgumentException (validation errors, business logic violations)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle validation errors from @Valid annotations
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDetails> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult()
             .getFieldErrors()
             .stream()
@@ -31,13 +46,27 @@ public class GlobalExceptionHandler {
             .findFirst()
             .orElse("Validation failed");
 
-        ErrorDetails error = new ErrorDetails(LocalDateTime.now(), errorMessage, request.getRequestURI());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        ApiResponse<Void> response = new ApiResponse<>(false, errorMessage);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle RuntimeException (general runtime errors)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Handle any other unexpected errors
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> handleGlobalException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception ex) {
+        ApiResponse<Void> response = new ApiResponse<>(false, "An unexpected error occurred: " + ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Legacy support for ErrorDetails (keeping for backward compatibility)
+    @ExceptionHandler({})
+    public ResponseEntity<ErrorDetails> handleLegacyErrors(Exception ex, HttpServletRequest request) {
         ErrorDetails error = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
