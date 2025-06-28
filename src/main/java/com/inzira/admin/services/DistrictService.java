@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.inzira.shared.entities.District;
+import com.inzira.shared.exceptions.ResourceNotFoundException;
 import com.inzira.shared.repositories.DistrictRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -19,7 +20,7 @@ public class DistrictService {
 
     public District createDistrict(District district) {
         if (districtRepository.existsByNameIgnoreCase(district.getName())) {
-            throw new IllegalArgumentException("District already exists.");
+            throw new IllegalArgumentException("District already exists");
         }
         return districtRepository.save(district);
     }
@@ -28,9 +29,9 @@ public class DistrictService {
         return districtRepository.findAll();
     }
 
-     public District getById(Long id) {
+    public District getById(Long id) {
         return districtRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("District not found!"));
+            .orElseThrow(() -> new ResourceNotFoundException("District not found with ID: " + id));
     }
 
     public Optional<District> getByName(String name) {
@@ -44,7 +45,7 @@ public class DistrictService {
         // Optional: check for duplicate by name
         if (!existing.getName().equalsIgnoreCase(updatedDistrict.getName()) &&
             districtRepository.existsByNameIgnoreCase(updatedDistrict.getName())) {
-            throw new IllegalArgumentException("District with this name already exists.");
+            throw new IllegalArgumentException("District with this name already exists");
         }
 
         existing.setName(updatedDistrict.getName());
@@ -56,5 +57,4 @@ public class DistrictService {
             .orElseThrow(() -> new EntityNotFoundException("District not found with ID: " + id));
         districtRepository.delete(district);
     }
-
 }

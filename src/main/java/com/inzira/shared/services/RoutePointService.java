@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.inzira.shared.entities.RoutePoint;
+import com.inzira.shared.exceptions.ResourceNotFoundException;
 import com.inzira.shared.repositories.RoutePointRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -11,110 +12,110 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
 /**
- * Service class for managing Location entities.
- * Handles business logic for creating, retrieving, updating, and deleting locations.
+ * Service class for managing RoutePoint entities.
+ * Handles business logic for creating, retrieving, updating, and deleting route points.
  */
 @Service
 public class RoutePointService {
 
     @Autowired
-    private RoutePointRepository locationRepository;
+    private RoutePointRepository routePointRepository;
 
     /**
-     * Creates a new Location if it doesn't already exist in the same district.
+     * Creates a new RoutePoint if it doesn't already exist in the same district.
      *
-     * @param location the Location to be created
-     * @return the saved Location
-     * @throws IllegalArgumentException if a location with the same name already exists in the district
+     * @param routePoint the RoutePoint to be created
+     * @return the saved RoutePoint
+     * @throws IllegalArgumentException if a route point with the same name already exists in the district
      */
-    public RoutePoint createLocation(RoutePoint location) {
-        Long districtId = location.getDistrict().getId();
-        String name = location.getName();
+    public RoutePoint createLocation(RoutePoint routePoint) {
+        Long districtId = routePoint.getDistrict().getId();
+        String name = routePoint.getName();
 
-        // Check if a location with the same name already exists in the district
-        if (locationRepository.existsByNameIgnoreCaseAndDistrictId(name, districtId)) {
-            throw new IllegalArgumentException("Location already exists in the same district.");
+        // Check if a route point with the same name already exists in the district
+        if (routePointRepository.existsByNameIgnoreCaseAndDistrictId(name, districtId)) {
+            throw new IllegalArgumentException("Route point already exists in the same district");
         }
 
-        return locationRepository.save(location);
+        return routePointRepository.save(routePoint);
     }
 
     /**
-     * Retrieves all locations from the database.
+     * Retrieves all route points from the database.
      *
-     * @return a list of all locations
+     * @return a list of all route points
      */
     public List<RoutePoint> getAll() {
-        return locationRepository.findAll();
+        return routePointRepository.findAll();
     }
 
     /**
-     * Retrieves a location by its ID.
+     * Retrieves a route point by its ID.
      *
-     * @param id the ID of the location
+     * @param id the ID of the route point
      * @return the found RoutePoint
-     * @throws RuntimeException if no location is found with the given ID
+     * @throws ResourceNotFoundException if no route point is found with the given ID
      */
     public RoutePoint getById(Long id) {
-        return locationRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Location not found!"));
+        return routePointRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Route point not found with ID: " + id));
     }
 
     /**
-     * Retrieves all locations that belong to a specific district.
+     * Retrieves all route points that belong to a specific district.
      *
      * @param districtId the ID of the district
-     * @return a list of locations in the given district
+     * @return a list of route points in the given district
      */
     public List<RoutePoint> getByDistrict(Long districtId) {
-        return locationRepository.findByDistrictId(districtId);
+        return routePointRepository.findByDistrictId(districtId);
     }
 
     /**
-     * Updates an existing location with new data.
+     * Updates an existing route point with new data.
      *
-     * @param id the ID of the location to update
-     * @param updatedLocation the new data to update the location with
-     * @return the updated Location
-     * @throws EntityNotFoundException if the location with the given ID does not exist
-     * @throws IllegalArgumentException if a duplicate location exists in the same district
+     * @param id the ID of the route point to update
+     * @param updatedRoutePoint the new data to update the route point with
+     * @return the updated RoutePoint
+     * @throws EntityNotFoundException if the route point with the given ID does not exist
+     * @throws IllegalArgumentException if a duplicate route point exists in the same district
      */
-    public RoutePoint updateLocation(Long id, RoutePoint updatedLocation) {
-        RoutePoint existing = locationRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Location not found with ID: " + id));
+    public RoutePoint updateLocation(Long id, RoutePoint updatedRoutePoint) {
+        RoutePoint existing = routePointRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Route point not found with ID: " + id));
 
-        Long updatedDistrictId = updatedLocation.getDistrict().getId();
-        String updatedName = updatedLocation.getName();
+        Long updatedDistrictId = updatedRoutePoint.getDistrict().getId();
+        String updatedName = updatedRoutePoint.getName();
 
-        // Check for duplicate name in the same district excluding the current location
-        boolean existsDuplicate = locationRepository.existsByNameIgnoreCaseAndDistrictIdAndIdNot(
+        // Check for duplicate name in the same district excluding the current route point
+        boolean existsDuplicate = routePointRepository.existsByNameIgnoreCaseAndDistrictIdAndIdNot(
             updatedName,
             updatedDistrictId,
             id
         );
 
         if (existsDuplicate) {
-            throw new IllegalArgumentException("Another location with this name already exists in the same district.");
+            throw new IllegalArgumentException("Another route point with this name already exists in the same district");
         }
 
-        // Update the existing location with new values
+        // Update the existing route point with new values
         existing.setName(updatedName);
-        existing.setGpsLat(updatedLocation.getGpsLat());
-        existing.setGpsLong(updatedLocation.getGpsLong());
-        existing.setDistrict(updatedLocation.getDistrict());
+        existing.setGpsLat(updatedRoutePoint.getGpsLat());
+        existing.setGpsLong(updatedRoutePoint.getGpsLong());
+        existing.setDistrict(updatedRoutePoint.getDistrict());
 
-        return locationRepository.save(existing);
+        return routePointRepository.save(existing);
     }
 
     /**
-     * Deletes a location by its ID.
+     * Deletes a route point by its ID.
      *
-     * @param id the ID of the location to delete
-     * @throws EntityNotFoundException if the location with the given ID does not exist
+     * @param id the ID of the route point to delete
+     * @throws EntityNotFoundException if the route point with the given ID does not exist
      */
     public void deleteLocation(Long id) {
-        RoutePoint location = locationRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Location not found with ID: " + id));
-        locationRepository.delete(location);
+        RoutePoint routePoint = routePointRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Route point not found with ID: " + id));
+        routePointRepository.delete(routePoint);
     }
 }
